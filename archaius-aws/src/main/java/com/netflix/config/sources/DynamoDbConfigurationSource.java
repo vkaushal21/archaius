@@ -21,13 +21,10 @@ import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.services.dynamodb.AmazonDynamoDB;
-import com.amazonaws.services.dynamodb.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.Key;
 import com.amazonaws.services.dynamodb.model.ScanRequest;
 import com.amazonaws.services.dynamodb.model.ScanResult;
-import com.netflix.config.DynamicPropertyFactory;
-import com.netflix.config.DynamicStringProperty;
 import com.netflix.config.PollResult;
 import com.netflix.config.PolledConfigurationSource;
 import org.slf4j.Logger;
@@ -81,7 +78,7 @@ public class DynamoDbConfigurationSource extends AbstractDynamoDbConfigurationSo
             ScanRequest scanRequest = new ScanRequest()
                     .withTableName(table)
                     .withExclusiveStartKey(lastKeyEvaluated);
-            ScanResult result = dbClient.scan(scanRequest);
+            ScanResult result = dbScanWithThroughputBackOff(scanRequest);
             for (Map<String, AttributeValue> item : result.getItems()) {
                 propertyMap.put(item.get(keyAttributeName.get()).getS(), item.get(valueAttributeName.get()).getS());
             }
